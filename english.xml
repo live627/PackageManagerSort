@@ -3,8 +3,8 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 	<id>Daniel15:PackageManagerSort</id>
-	<version>1.0</version>
-	
+	<version>1.0.2</version>
+
 	<file name="$languagedir/Modifications.english.php">
 		<operation>
 			<search position="after"><![CDATA[?>]]></search>
@@ -29,7 +29,7 @@ $txt['pkgstatehelp_upgrade'] = 'A previous version of these mods is installed. I
 ]]></add>
 		</operation>
 	</file>
-	
+
 	<file name="$languagedir/Modifications.english-utf8.php" error="skip">
 		<operation>
 			<search position="end" />
@@ -54,7 +54,7 @@ $txt['pkgstatehelp_upgrade'] = 'A previous version of these mods is installed. I
 ]]></add>
 		</operation>
 	</file>
-	
+
 	<file name="$languagedir/Modifications.english_british.php" error="skip">
 		<operation>
 			<search position="end" />
@@ -79,7 +79,7 @@ $txt['pkgstatehelp_upgrade'] = 'A previous version of these mods is installed. I
 ]]></add>
 		</operation>
 	</file>
-	
+
 	<file name="$languagedir/Modifications.english_british-utf8.php" error="skip">
 		<operation>
 			<search position="end" />

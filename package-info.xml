@@ -3,16 +3,16 @@
 
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Daniel15:PackageManagerSort</id>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<name>Sorted Package Manager Listing</name>
 	<type>modification</type>
-	
-	<install for="2.0 RC3">
+
+	<install for="2.0 - 2.99.99">
 		<modification type="file">install20.xml</modification>
 		<modification type="file">english.xml</modification>
 	</install>
-	
-	<uninstall for="2.0 RC3">
+
+	<uninstall for="2.0 - 2.99.99">
 		<modification type="file" reverse="true">install20.xml</modification>
 		<modification type="file" reverse="true">english.xml</modification>
 	</uninstall>

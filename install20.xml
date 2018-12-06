@@ -3,7 +3,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 	<id>Daniel15:PackageManagerSort</id>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	
 	<file name="$sourcedir/Packages.php">
 		<operation>
@@ -121,9 +121,9 @@
 			<search position="replace"><![CDATA[
 		echo '
 			<br />
-			<h3 class="titlebg"><span class="left"></span>
-				', $txt['modification_package'], '
-			</h3>
+			<div class="title_bar">
+				<h3 class="titlebg">', $txt['modification_package'], '</h3>
+			</div>
 ]]></search>
 			<add><![CDATA[
 		// Loop through all states.
@@ -141,9 +141,9 @@
 			// Header at the very top.
 			echo '
 			<br />
-			<h3 class="titlebg"><span class="left"></span>
-				', $txt['modification_package'], ' &mdash; ', $label, ' ', $help, '</td>
-			</h3>
+			<div class="title_bar">
+				<h3 class="titlebg">', $txt['modification_package'], ' &mdash; ', $label, ' ', $help, '</h3>
+			</div>
 ]]></add>
 		</operation>
 		
@@ -153,83 +153,17 @@
 			whole block.
 		-->
 		<operation>
+			<search position="replace"><![CDATA[foreach ($context['available_mods'] as $i => $package)]]></search>
+			<add><![CDATA[foreach ($available_mods as $i => $package)]]></add>
+		</operation>
+		<operation>
 			<search position="replace"><![CDATA[
-		foreach ($context['available_mods'] as $i => $package)
-		{
-			echo '
-				<tr class="', $alt ? 'windowbg2' : 'windowbg', '">
-					<td>', ++$i, '.</td>
-					<td>', $package['name'], '</td>
-					<td>
-						', $package['version'];
-
-			if ($package['is_installed'] && !$package['is_newer'])
-				echo '
-						<img src="', $settings['images_url'], '/icons/package_', $package['is_current'] ? 'installed' : 'old', '.gif" alt="" align="middle" style="margin-left: 2ex;" />';
-
-			echo '
-					</td>
-					<td align="right">';
-
-			if ($package['can_uninstall'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=uninstall;package=', $package['filename'], ';pid=', $package['installed_id'], '">[ ', $txt['uninstall'], ' ]</a>';
-			elseif ($package['can_upgrade'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=install;package=', $package['filename'], '">[ ', $txt['package_upgrade'], ' ]</a>';
-			elseif ($package['can_install'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=install;package=', $package['filename'], '">[ ', $txt['install_mod'], ' ]</a>';
-
-			echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=list;package=', $package['filename'], '">[ ', $txt['list_files'], ' ]</a>
-						<a href="', $scripturl, '?action=admin;area=packages;sa=remove;package=', $package['filename'], '"', $package['is_installed'] && $package['is_current'] ? ' onclick="return confirm(\'' . $txt['package_delete_bad'] . '\');"' : '', '>[ ', $txt['package_delete'], ' ]</a>
-					</td>
-				</tr>';
-			$alt = !$alt;
-		}
-
 		echo '
 			</tbody>
 			</table>
 			';
 ]]></search>
 			<add><![CDATA[
-			foreach ($available_mods as $i => $package)
-			{
-			echo '
-				<tr class="', $alt ? 'windowbg2' : 'windowbg', '">
-					<td>', ++$i, '.</td>
-					<td>', $package['name'], '</td>
-					<td>
-						', $package['version'];
-
-			if ($package['is_installed'] && !$package['is_newer'])
-				echo '
-						<img src="', $settings['images_url'], '/icons/package_', $package['is_current'] ? 'installed' : 'old', '.gif" alt="" align="middle" style="margin-left: 2ex;" />';
-
-			echo '
-					</td>
-					<td align="right">';
-
-			if ($package['can_uninstall'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=uninstall;package=', $package['filename'], ';pid=', $package['installed_id'], '">[ ', $txt['uninstall'], ' ]</a>';
-			elseif ($package['can_upgrade'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=install;package=', $package['filename'], '">[ ', $txt['package_upgrade'], ' ]</a>';
-			elseif ($package['can_install'])
-				echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=install;package=', $package['filename'], '">[ ', $txt['install_mod'], ' ]</a>';
-
-			echo '
-						<a href="', $scripturl, '?action=admin;area=packages;sa=list;package=', $package['filename'], '">[ ', $txt['list_files'], ' ]</a>
-						<a href="', $scripturl, '?action=admin;area=packages;sa=remove;package=', $package['filename'], '"', $package['is_installed'] && $package['is_current'] ? ' onclick="return confirm(\'' . $txt['package_delete_bad'] . '\');"' : '', '>[ ', $txt['package_delete'], ' ]</a>
-					</td>
-				</tr>';
-			$alt = !$alt;
-		}
-
 		echo '
 			</tbody>
 			</table>

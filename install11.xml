@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="xslt/modification.xsl" type="text/xsl"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+	<id>Daniel15:PackageManagerSort</id>
+	<version>1.0</version>
+	
+	<file name="$sourcedir/Packages.php">
+		<operation>
+			<search position="before"><![CDATA[
+			if (!$packageInfo['is_installed'] && $packageInfo['xml']->exists('install'))
+			{
+]]></search>
+			<add><![CDATA[
+				// By default, assume we can't install it.
+				$packageInfo['state'] = '04-cannot_install';
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="before"><![CDATA[
+						$packageInfo['can_install'] = true;
+]]></search>
+			<add><![CDATA[
+						$packageInfo['state'] = '01-install';			
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="before"><![CDATA[
+			// An already installed, but old, package.  Can we upgrade it?
+			elseif ($packageInfo['is_installed'] && !$packageInfo['is_current'] && $packageInfo['xml']->exists('upgrade'))
+			{
+]]></search>
+			<add><![CDATA[
+				// By default, assume we can't upgrade it (invalid version, whatever).
+				$packageInfo['state'] = '05-cannot_upgrade';
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="before"><![CDATA[
+						if (!$upgrade->exists('@from') || matchPackageVersion($installed_mods[$packageInfo['id']], $upgrade->fetch('@from')))
+						{
+							$packageInfo['can_upgrade'] = true;
+]]></search>
+			<add><![CDATA[
+							$packageInfo['state'] = '02-upgrade';
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="replace"><![CDATA[
+			// Note that it has to be the current version to be uninstallable.  Shucks.
+			elseif ($packageInfo['is_installed'] && $packageInfo['is_current'] && $packageInfo['xml']->exists('uninstall'))
+			{
+				$uninstalls = $packageInfo['xml']->set('uninstall');
+
+				// Can we find any uninstallation methods that work for this SMF version?
+				foreach ($uninstalls as $uninstall)
+					if (!$uninstall->exists('@for') || matchPackageVersion($the_version, $uninstall->fetch('@for')))
+					{
+						$packageInfo['can_uninstall'] = true;
+						break;
+					}
+			}
+]]></search>
+			<add><![CDATA[
+			// Is it installed, and the latest version? Maybe we can uninstall it?
+			elseif ($packageInfo['is_installed'] && $packageInfo['is_current'])
+			{
+				// Is there an uninstall section? 
+				if ($packageInfo['xml']->exists('uninstall'))
+				{
+					// Assume we can't uninstall it (version difference, whatever).
+					$packageInfo['state'] = '06-cannot_uninstall';
+					
+					$uninstalls = $packageInfo['xml']->set('uninstall');
+
+					// Can we find any uninstallation methods that work for this SMF version?
+					foreach ($uninstalls as $uninstall)
+						if (!$uninstall->exists('@for') || matchPackageVersion($the_version, $uninstall->fetch('@for')))
+						{
+							$packageInfo['can_uninstall'] = true;
+							$packageInfo['state'] = '03-uninstall';
+							break;
+						}
+				}
+				// No uninstall section? No uninstall! 
+				else
+					$packageInfo['state'] = '06-cannot_uninstall_2';
+			}
+			// What else could it be?!
+			else
+				$packageInfo['state'] = '07-unknown';
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="replace"><![CDATA[
+				$context['available_mods'][] = $packageInfo;
+]]></search>
+			<add><![CDATA[
+				$context['available_mods'][$packageInfo['state']][] = $packageInfo;
+]]></add>
+		</operation>
+		
+		<operation>
+			<search position="before"><![CDATA[
+		closedir($dir);
+]]></search>
+			<add><![CDATA[
+		// Sort the states.
+		ksort($context['available_mods']);
+]]></add>
+		</operation>
+	</file>
+	
+	<file name="$themedir/Packages.template.php">
+		<operation>
+			<search position="replace"><![CDATA[
+		echo '
+			<tr>
+				<td class="catbg">', $txt['package7'], '</td>
+]]></search>
+			<add><![CDATA[
+		// Loop through all states.
+		foreach ($context['available_mods'] as $state => $available_mods)
+		{
+			// This state's language string.
+			// !!! This should probably be put in the Packages.php file.
+			// Trim off the first three characters (used for sorting).
+			$state_txt = substr($state, 3);
+			// The label itself.
+			$label = isset($txt['pkgstate_' . $state_txt]) ? $txt['pkgstate_' . $state_txt] : $state_txt;
+			// Do we have any help text?
+			$help = isset($txt['pkgstatehelp_' . $state_txt]) ? ' <a href="' . $scripturl . '?action=helpadmin;help=pkgstatehelp_' . $state_txt . '" onclick="return reqWin(this.href);" class="help"><img src="' . $settings['images_url'] . '/helptopics.gif" alt="' . $txt[119] . '" align="top" /></a>' : '';
+			
+			// Header at the very top.
+			echo '
+			<tr>
+				<td class="catbg">', $txt['package7'], ' &mdash; ', $label, ' ', $help, '</td>
+]]></add>
+		</operation>
+		
+		<!-- 
+			This should really be split into multiple edits. However, the
+			indentation level of the whole block changes, so we need to edit the
+			whole block.
+		-->
+		<operation>
+			<search position="replace"><![CDATA[foreach ($context['available_mods'] as $i => $package)
+		{
+			echo '
+						<tr>
+							<td>', ++$i, '.</td>
+							<td>', $package['name'], '</td>
+							<td>
+								', $package['version'];
+
+			if ($package['is_installed'] && !$package['is_newer'])
+				echo '
+								<img src="', $settings['images_url'], '/icons/package_', $package['is_current'] ? 'installed' : 'old', '.gif" alt="" width="12" height="11" align="middle" style="margin-left: 2ex;" />';
+
+			echo '
+							</td>
+							<td align="right">';
+
+		if ($package['can_uninstall'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=uninstall;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['smf198b'], ' ]</a>';
+		elseif ($package['can_upgrade'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=install;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['package_upgrade'], ' ]</a>';
+		elseif ($package['can_install'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=install;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['package11'], ' ]</a>';
+
+		echo '
+								<a href="', $scripturl, '?action=packages;sa=list;package=', $package['filename'], '">[ ', $txt['package14'], ' ]</a>
+								<a href="', $scripturl, '?action=packages;sa=remove;package=', $package['filename'], ';sesc=', $context['session_id'], '"', $package['is_installed'] && $package['is_current'] ? ' onclick="return confirm(\'' . $txt['package_delete_bad'] . '\');"' : '', '>[ ', $txt['package52'], ' ]</a>
+							</td>
+						</tr>';
+		}
+
+		echo '
+					</table>
+				</td>
+			</tr>';
+	}]]></search>
+			<add><![CDATA[	$alt = false;
+			foreach ($available_mods as $i => $package)
+			{
+				echo '
+							<tr class="', $alt ? 'windowbg2' : 'windowbg', '">
+								<td>', ++$i, '.</td>
+								<td>', $package['name'], '</td>
+								<td>
+									', $package['version'];
+
+				if ($package['is_installed'] && !$package['is_newer'])
+					echo '
+								<img src="', $settings['images_url'], '/icons/package_', $package['is_current'] ? 'installed' : 'old', '.gif" alt="" width="12" height="11" align="middle" style="margin-left: 2ex;" />';
+
+			echo '
+							</td>
+							<td align="right">';
+
+		if ($package['can_uninstall'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=uninstall;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['smf198b'], ' ]</a>';
+		elseif ($package['can_upgrade'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=install;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['package_upgrade'], ' ]</a>';
+		elseif ($package['can_install'])
+			echo '
+								<a href="', $scripturl, '?action=packages;sa=install;package=', $package['filename'], ';sesc=', $context['session_id'], '">[ ', $txt['package11'], ' ]</a>';
+
+		echo '
+								<a href="', $scripturl, '?action=packages;sa=list;package=', $package['filename'], '">[ ', $txt['package14'], ' ]</a>
+								<a href="', $scripturl, '?action=packages;sa=remove;package=', $package['filename'], ';sesc=', $context['session_id'], '"', $package['is_installed'] && $package['is_current'] ? ' onclick="return confirm(\'' . $txt['package_delete_bad'] . '\');"' : '', '>[ ', $txt['package52'], ' ]</a>
+								</td>
+							</tr>';
+				$alt = !$alt;
+			}
+		
+			echo '
+					</table>
+				</td>
+			</tr>';
+		}
+	}
+]]></add>
+		</operation>
+	</file>
+</modification>

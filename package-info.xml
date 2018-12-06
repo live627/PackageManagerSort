@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="xslt/package-info.xsl" type="text/xsl"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>Daniel15:PackageManagerSort</id>
+	<name>Sorted Package Manager Listing</name>
+	<version>1.0</version>
+	<type>modification</type>
+
+	<install for="2.0 RC2">
+		<modification type="file">install20.xml</modification>
+		<modification type="file">english.xml</modification>
+	</install>
+	
+	<uninstall for="2.0 RC2">
+		<modification type="file" reverse="true">install20.xml</modification>
+		<modification type="file" reverse="true">english.xml</modification>
+	</uninstall>
+
+	<install for="1.1 - 1.1.99">
+		<modification type="file">install11.xml</modification>
+		<modification type="file">english.xml</modification>
+	</install>
+	
+	<uninstall for="1.1 - 1.1.99">
+		<modification type="file" reverse="true">install11.xml</modification>
+		<modification type="file" reverse="true">english.xml</modification>
+	</uninstall>
+
+</package-info>

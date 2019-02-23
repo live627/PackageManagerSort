@@ -72,6 +72,7 @@
 				]]></add>
 		</operation>
 
+<!--
 		<operation>
 			<search position="replace"><![CDATA[elseif (!isset($sort_id[$packageInfo['type']], $packages[$packageInfo['type']], $context['available_' . $packageInfo['type']]) && $params == 'unknown')]]></search>
 			<add><![CDATA[elseif (isset($sort_id[$packageInfo['state']], $packages[$packageInfo['state']], $context['available_' . $packageInfo['state']]) && $params == $packageInfo['state'] && $packageInfo['type'] == 'modification')
@@ -105,6 +106,7 @@
 				// Avatar package.
 				]]></add>
 		</operation>
+-->
 
 		<operation>
 			<search position="after"><![CDATA[// Other stuff.
